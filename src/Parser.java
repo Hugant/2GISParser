@@ -1,5 +1,6 @@
 package src;
 
+import java.io.IOException;
 import java.net.URL;
 
 import org.jsoup.Jsoup;
@@ -18,6 +19,56 @@ public class Parser {
 	}
 	
 	public String getTypes() {
+		String types = "";
+		String domain = this.getWebsite();
+		
+		if (!domain.contains("http://")) {
+			domain = "http://" + domain;
+		}
+		System.out.println(domain);
+		
+		if (domain != null && !domain.equals("")) {
+			Document doc;
+			try {
+				doc = Jsoup.parse(new URL(domain).openStream(), "UTF-8", domain);
+			} catch (IOException e) {
+				return "";
+			}
+			
+			String html = doc.html().toLowerCase();
+			
+			
+			if (html.contains("мягкая мебель") ||
+					html.contains("мягкой мебели") ||
+					html.contains("диваны")) {
+				types += "мягкая мебель,";
+			}
+			
+			if (html.contains("матрасы") || 
+					html.contains("матрацы")) {
+				types += "матрасы,";
+			}
+			
+			if (html.contains("корпусная мебель") || 
+					html.contains("корпусной мебели")) {
+				types += "корпусная мебель";
+			}
+			
+			if (!types.equals("")) {
+				types = types.substring(0, types.length() - 1);
+				types = types.replace("корпусная мебель", "");
+			} else { 
+				
+			}
+			
+			
+			
+				
+			
+			
+			
+		}
+		
 		return "";
 	}
 	
