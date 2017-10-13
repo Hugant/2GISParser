@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 public class Main {
 	public static final String GIS_URL = "https://2gis.ru";
 	
+	public static final String CITY_RU = "РСЂРєСѓС‚СЃРє";
 	public static final String CITY = "irkutsk";
-	public static final String REQUEST = "мягкая мебель";
+	
+	public static final String REQUEST = "РјСЏРіРєР°СЏ РјРµР±РµР»СЊ";
 	
 	private static final int START_PAGE = 1;
 	private static final int END_PAGE = 2;
@@ -22,13 +24,14 @@ public class Main {
 		int counter = 0;
 		int addedCounter = 0;
 		
-		HEADER.put("Name", "Название");
-		HEADER.put("Phone", "Телефон");
-		HEADER.put("Email", "Почта");
-		HEADER.put("City", "Город");
-		HEADER.put("Website", "Сайт");
-		HEADER.put("Address", "Адрес");
-		HEADER.put("Sphere", "Сфера деятельности");
+		HEADER.put("Name", "РќР°Р·РІР°РЅРёРµ Р»РёРґР°");
+		HEADER.put("CompanyName", "РќР°Р·РІР°РЅРёРµ РєРѕРјРїР°РЅРёРё");
+		HEADER.put("Phone", "РўРµР»РµС„РѕРЅ");
+		HEADER.put("Email", "РџРѕС‡С‚Р°");
+		HEADER.put("City", "Р“РѕСЂРѕРґ");
+		HEADER.put("Website", "РЎР°Р№С‚");
+		HEADER.put("Address", "РђРґСЂРµСЃ");
+		HEADER.put("Sphere", "РЎС„РµСЂР° РґРµСЏС‚РµР»СЊРЅРѕСЃС‚Рё");
 
 		Table table = new Table();
 		table.setHeader(HEADER.values().toArray());
@@ -46,13 +49,13 @@ public class Main {
 				Parser parser = new Parser(page.getLinks()[j], GIS_URL);
 				CompanyCard card = new CompanyCard();
 				
-				card.setProperty(HEADER.get("Name"), 	parser.getName());
-				card.setProperty(HEADER.get("Phone"), 	parser.getPhones());
-				card.setProperty(HEADER.get("Email"), 	parser.getEmails());
-				card.setProperty(HEADER.get("City"), 	parser.getCity());
-				card.setProperty(HEADER.get("Website"), parser.getWebsite());
-				card.setProperty(HEADER.get("Address"), parser.getAddress());
-				card.setProperty(HEADER.get("Sphere"), 	parser.getTypes());
+				card.setProperty(HEADER.get("CompanyName"),	parser.getName());
+				card.setProperty(HEADER.get("Phone"), 		parser.getPhones());
+				card.setProperty(HEADER.get("Email"), 		parser.getEmails());
+				card.setProperty(HEADER.get("City"), 		Main.CITY_RU);
+				card.setProperty(HEADER.get("Website"),		parser.getWebsite());
+				card.setProperty(HEADER.get("Address"), 	parser.getAddress());
+				card.setProperty(HEADER.get("Sphere"), 		parser.getTypes());
 				
 				if (card.isValid()) {
 					table.fillRow(card);
@@ -60,19 +63,93 @@ public class Main {
 				}
 				
 				counter++;
-				System.out.printf("%-25s%s%n",card.getProperties().get("Название"),
-						card.getProperties().get("Сайт"));
+				System.out.printf("%-25s%s%n",
+						card.getProperties().get("РќР°Р·РІР°РЅРёРµ РєРѕРјРїР°РЅРёРё"),
+						card.getProperties().get("Р“РѕСЂРѕРґ"));
 			}
 			
-			System.out.println("Страница " + i + " просмотренна");
+			System.out.println("РЎС‚СЂР°РЅРёС†Р° " + i + " РїСЂРѕСЃРјРѕС‚СЂРµРЅРЅР°");
 		}
 		
 		table.write("test");
 		
 		long endWork = System.currentTimeMillis();
 		long work = endWork - startWork;
-		System.out.println("Работа завершена. Просмотренно " + counter + " компаний."
-				+ " В базу занесено " + addedCounter + ". Затрачено " + 
-				(work / 1000 / 60) + " минут " + (work / 1000 % 60) + " секунд");
+		System.out.println("Р Р°Р±РѕС‚Р° Р·Р°РІРµСЂС€РµРЅР°. РџСЂРѕСЃРјРѕС‚СЂРµРЅРЅРѕ " + counter + " РєРѕРјРїР°РЅРёР№."
+				+ " Р’ Р±Р°Р·Сѓ Р·Р°РЅРµСЃРµРЅРѕ " + addedCounter + ". Р—Р°С‚СЂР°С‡РµРЅРѕ " + 
+				(work / 1000 / 60) + " РјРёРЅСѓС‚ " + (work / 1000 % 60) + " СЃРµРєСѓРЅРґ");
+	}
+	
+	
+	public static String lat2cyr(String s){
+		StringBuilder sb = new StringBuilder(s.length());
+		
+		int i = 0;
+		while (i < s.length()) {
+			char ch = s.charAt(i);
+			
+			if (ch == 'J'){
+				i++; 
+				ch = s.charAt(i);
+				
+				switch (ch) {
+					case 'E': sb.append('РЃ'); break;
+					case 'S':
+						sb.append('Р©');
+						i++; 
+						if(s.charAt(i) != 'H') 
+							throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
+						break;
+					case 'H': sb.append('Р¬'); break;
+					case 'U': sb.append('Р®'); break;
+					case 'A': sb.append('РЇ'); break;
+					default: 
+						throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
+				}
+			} else if (i+1 < s.length() && s.charAt(i+1)=='H' 
+					&& !(i+2 < s.length() && s.charAt(i+2)=='H')) {
+				switch (ch) {
+					case 'Z': sb.append('Р–'); break;
+					case 'K': sb.append('РҐ'); break;
+					case 'C': sb.append('Р§'); break;
+					case 'S': sb.append('РЁ'); break;
+					case 'E': sb.append('Р­'); break;
+					case 'H': sb.append('РЄ'); break;
+					case 'I': sb.append('Р«'); break;
+					default:
+						throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
+				}
+				
+				i++;
+			} else {
+				switch (ch) {
+					case 'A': sb.append('Рђ'); break;
+					case 'B': sb.append('Р‘'); break;
+					case 'V': sb.append('Р’'); break;
+					case 'G': sb.append('Р“'); break;
+					case 'D': sb.append('Р”'); break;
+					case 'E': sb.append('Р•'); break;
+					case 'Z': sb.append('Р—'); break;
+					case 'I': sb.append('Р'); break;
+					case 'Y': sb.append('Р™'); break;
+					case 'K': sb.append('Рљ'); break;
+					case 'L': sb.append('Р›'); break;
+					case 'M': sb.append('Рњ'); break;
+					case 'N': sb.append('Рќ'); break;
+					case 'O': sb.append('Рћ'); break;
+					case 'P': sb.append('Рџ'); break;
+					case 'R': sb.append('Р '); break;
+					case 'S': sb.append('РЎ'); break;
+					case 'T': sb.append('Рў'); break;
+					case 'U': sb.append('РЈ'); break;
+					case 'F': sb.append('Р¤'); break;
+					case 'C': sb.append('Р¦'); break;
+					default: sb.append(ch);
+				}
+			}
+
+			i++;
+		}
+		return sb.toString();
 	}
 }
