@@ -42,6 +42,7 @@ public class Table {
 	}
 	
 	public void write(String name) {
+		// TODO: handle a exception
 		try {
 			book.write(new FileOutputStream(name + ".xls"));
 			book.close();
