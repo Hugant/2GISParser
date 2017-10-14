@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Parser {
@@ -19,57 +20,71 @@ public class Parser {
 	}
 	
 	public String getTypes() {
+		String types;
+		try {
+			types = checkTypes(this.getWebsite(), 
+					new String[] {"мягкая мебель", "мягкой мебели", "диваны", "диванов", "мягкая мебель"},
+					new String[] {"матрасы", "матрасов", "матрацы", "матрасы"});
+		} catch (IOException e) {
+			types = "";
+		}
+		
+		return types;
+	}
+	
+	private String checkTypes(String url, String[]... params) throws IOException {
 		String types = "";
-		String domain = this.getWebsite();
 		
-		if (!domain.contains("http://")) {
-			domain = "http://" + domain;
-		}
-		System.out.println(domain);
-		
-		if (domain != null && !domain.equals("")) {
-			Document doc;
-			try {
-				doc = Jsoup.parse(new URL(domain).openStream(), "UTF-8", domain);
-			} catch (IOException e) {
-				return "";
-			}
-			
-			String html = doc.html().toLowerCase();
-			
-			
-			if (html.contains("мягкая мебель") ||
-					html.contains("мягкой мебели") ||
-					html.contains("диваны")) {
-				types += "мягкая мебель,";
-			}
-			
-			if (html.contains("матрасы") || 
-					html.contains("матрацы")) {
-				types += "матрасы,";
-			}
-			
-			if (html.contains("корпусная мебель") || 
-					html.contains("корпусной мебели")) {
-				types += "корпусная мебель";
-			}
-			
-			if (!types.equals("")) {
-				types = types.substring(0, types.length() - 1);
-				types = types.replace("корпусная мебель", "");
-			} else { 
-				
-			}
-			
-			
-			
-				
-			
-			
-			
+		if (!url.contains("http://")) {
+			url = "http://" + url;
 		}
 		
-		return "";
+		Document doc;
+		try {
+			doc = Jsoup.parse(new URL(url).openStream(), "UTF-8", url);
+		} catch (IOException e) {
+			throw new IOException("Bad url request: " + url);
+		} catch (IllegalArgumentException e) {
+			return "";
+		}
+		
+		String html = doc.html().toLowerCase();
+		
+		types = searchTypes(html, params);
+		
+		if (types.equals("")) {
+			Elements links = doc.select("a");
+			for (Element link : links) {
+				if (link.html().toLowerCase().contains("католог")) {
+					types = searchTypes(html, params);
+					
+					if (!types.equals("")) {
+						break;
+					}
+				}
+			}
+		}
+		
+		return types;
+	}
+	
+	private String searchTypes(String html, String[]... params) {
+		String types = "";
+		
+		for (int i = 0; i < params.length; i++) {
+			for (int j = 0; j < params[i].length - 1; j++) {
+				if (html.contains(params[i][j])) {
+					if (!types.equals("")) {
+						types += ", ";
+					}
+					
+					types += params[i][params[i].length - 1];
+					break;
+				}
+			}
+		}
+		
+		return types;
 	}
 	
 	public String getAddress() {
