@@ -15,7 +15,7 @@ public class Main {
 	private static final int START_PAGE = 1;
 	private static final int END_PAGE = 2;
 	
-	private static final LinkedHashMap<String, String> HEADER = new LinkedHashMap<String, String>();
+	public static final LinkedHashMap<String, String> HEADER = new LinkedHashMap<String, String>();
 	private static final TreeMap<String, CompanyCard> COMPANIES= new TreeMap<String, CompanyCard>();
 	
 	
@@ -32,9 +32,6 @@ public class Main {
 		HEADER.put("Website", "Сайт");
 		HEADER.put("Address", "Адрес");
 		HEADER.put("Sphere", "Сфера деятельности");
-
-		Table table = new Table();
-		table.setHeader(HEADER.values().toArray());
 		
 		for (int i = START_PAGE; i < END_PAGE; i++) {
 			Page page;
@@ -58,17 +55,24 @@ public class Main {
 				card.setProperty(HEADER.get("Sphere"), 		parser.getTypes());
 				
 				if (card.isValid()) {
-					table.fillRow(card);
+					COMPANIES.put(card.getProperties().get(HEADER.get("CompanyName")), card);
 					addedCounter++;
+					System.out.printf("%-25s%s%n",
+							card.getProperties().get("Название компании"),
+							card.getProperties().get("Сайт"));
 				}
 				
 				counter++;
-				System.out.printf("%-25s%s%n",
-						card.getProperties().get("Название компании"),
-						card.getProperties().get("Город"));
 			}
 			
 			System.out.println("Страница " + i + " просмотренна");
+		}
+		
+		Table table = new Table();
+		table.setHeader(HEADER.values().toArray());
+		
+		for (CompanyCard card : COMPANIES.values()) {
+			table.fillRow(card);
 		}
 		
 		table.write("test");
