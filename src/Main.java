@@ -68,6 +68,8 @@ public class Main {
 			System.out.println("Страница " + i + " просмотренна");
 		}
 		
+		long endWork = System.currentTimeMillis();
+		
 		Table table = new Table();
 		table.setHeader(HEADER.values().toArray());
 		
@@ -77,7 +79,7 @@ public class Main {
 		
 		table.write("test");
 		
-		long endWork = System.currentTimeMillis();
+		
 		long work = endWork - startWork;
 		System.out.println("Работа завершена. Просмотренно " + counter + " компаний."
 				+ " В базу занесено " + addedCounter + ". Затрачено " + 
