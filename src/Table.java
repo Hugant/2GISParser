@@ -47,7 +47,14 @@ public class Table {
 			book.write(new FileOutputStream(name + ".xls"));
 			book.close();
 		} catch(java.io.IOException e) {
-			
+			System.out.println("Закройте открытую таблицу");
+			System.out.println("Следующий запрос через 10 секунд");
+			try {
+				Thread.sleep(10000);
+				write(name);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 	
