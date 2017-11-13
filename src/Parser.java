@@ -2,17 +2,30 @@ package src;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Parser {
 	private Document doc = null;
 	
-	public Parser(URL url, String domain) throws Exception {
-		this.doc = Jsoup.parse(url.openStream(), "UTF-8", domain);
+	private LinkedHashMap<String, String[]> positiveFilter = null;
+	private LinkedHashMap<String, String[]> negativeFilter = null;
+	
+	public Parser(URL url, LinkedHashMap<String, String[]> positiveFilter,
+			LinkedHashMap<String, String[]> negativeFilter) {
+		this.positiveFilter = positiveFilter;
+		this.negativeFilter = negativeFilter;
+		
+		try {
+			this.doc = Jsoup.parse(url.openStream(), "UTF-8", Main.GIS_URL);
+		} catch (IOException e) {
+			System.out.println("Cannot open stream with " + url.toString());
+			return;
+		}
 	}
 	
 	public String getName() {
@@ -22,17 +35,16 @@ public class Parser {
 	public String getTypes() {
 		String types;
 		try {
-			types = checkTypes(this.getWebsite(), 
-					new String[] {"мягкая мебель", "мягкой мебели", "диваны", "диванов", "мягкая мебель"},
-					new String[] {"матрасы", "матрасов", "матрацы", "матрасы"});
+			types = checkTypes(this.getWebsite(), positiveFilter.values().toArray(new String[positiveFilter.size()][]));
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			types = "";
 		}
 		
 		return types;
 	}
 	
-	private String checkTypes(String url, String[]... params) throws IOException {
+	public String checkTypes(String url, String[]... params) throws IOException {
 		String types = "";
 		
 		if (!url.contains("http://")) {
@@ -47,23 +59,34 @@ public class Parser {
 		} catch (IllegalArgumentException e) {
 			return "";
 		}
+		System.out.println(doc);
 		
 		String html = doc.html().toLowerCase();
 		
-		types = searchTypes(html, params);
-		
-		if (types.equals("")) {
-			Elements links = doc.select("a");
-			for (Element link : links) {
-				if (link.html().toLowerCase().contains("католог")) {
-					types = searchTypes(html, params);
-					
-					if (!types.equals("")) {
-						break;
-					}
-				}
+		for (Map.Entry<String, String[]> entry : negativeFilter.entrySet()) {
+			for (String str : entry.getValue()) {
+				html.replaceAll(str, "");
 			}
 		}
+		
+		types = searchTypes(html, params);
+		
+		
+//		if (types.equals("")) {
+//			Elements links = doc.select("a");
+//			for (Element link : links) {
+//				if (link.html().toLowerCase().contains("католог") ||
+//						link.html().toLowerCase().contains("мебель для дома") ||
+//						link.html().toLowerCase().contains("для дома") ||
+//						link.html().toLowerCase().contains("категории")) {
+//					types = searchTypes(html, params);
+//					
+//					if (!types.equals("")) {
+//						break;
+//					}
+//				}
+//			}
+//		}
 		
 		return types;
 	}
@@ -71,14 +94,14 @@ public class Parser {
 	private String searchTypes(String html, String[]... params) {
 		String types = "";
 		
-		for (int i = 0; i < params.length; i++) {
-			for (int j = 0; j < params[i].length - 1; j++) {
-				if (html.contains(params[i][j])) {
+		for (Map.Entry<String, String[]> entry : positiveFilter.entrySet()) {
+			for (String str : entry.getValue()) {
+				if (html.contains(str)) {
 					if (!types.equals("")) {
 						types += ", ";
 					}
 					
-					types += params[i][params[i].length - 1];
+					types += entry.getKey();
 					break;
 				}
 			}
@@ -143,5 +166,18 @@ public class Parser {
 	
 	public String getCity() {
 		return "";
+	}
+	
+	public CompanyCard getCard() {
+		CompanyCard card = new CompanyCard();
+		
+		card.setProperty(Main.HEADER.get("CompanyName"), getName());
+		card.setProperty(Main.HEADER.get("Phone"), 		 getPhones());
+		card.setProperty(Main.HEADER.get("Email"), 		 getEmails());
+		card.setProperty(Main.HEADER.get("City"), 		 Main.CITY_RU);
+		card.setProperty(Main.HEADER.get("Website"),	 getWebsite());
+		card.setProperty(Main.HEADER.get("Address"), 	 getAddress());
+		card.setProperty(Main.HEADER.get("Sphere"), 	 getTypes());
+		return card;
 	}
 }

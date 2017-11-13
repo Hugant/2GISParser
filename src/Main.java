@@ -1,161 +1,68 @@
 package src;
 
-
-import java.util.TreeMap;
 import java.util.LinkedHashMap;
 
 public class Main {
 	public static final String GIS_URL = "https://2gis.ru";
 	
-	public static final String CITY_RU = "Иркутск";
-	public static final String CITY = "irkutsk";
+	public static final String CITY_RU = "Уфа";
+	private static final String CITY = "ufa";
 	
-	public static final String REQUEST = "мягкая мебель";
+	private static final String REQUEST = "мягкая мебель";
 	
 	private static final int START_PAGE = 1;
-	private static final int END_PAGE = 2;
+	private static final int END_PAGE = 0;
 	
 	public static final LinkedHashMap<String, String> HEADER = new LinkedHashMap<String, String>();
-	private static final TreeMap<String, CompanyCard> COMPANIES= new TreeMap<String, CompanyCard>();
 	
+	private static LinkedHashMap<String, String[]> POSITIVE_FILTER = new LinkedHashMap<String, String[]>();
+	private static LinkedHashMap<String, String[]> NEGATIVE_FILTER = new LinkedHashMap<String, String[]>();
 	
 	public static void main(String[] args) throws Exception {
 		long startWork = System.currentTimeMillis();
-		int counter = 0;
-		int addedCounter = 0;
 		
 		HEADER.put("Name", "Название лида");
-		HEADER.put("CompanyName", "Название компании");
-		HEADER.put("Phone", "Телефон");
-		HEADER.put("Email", "Почта");
+		HEADER.put("CompanyName", "Название (компания)");
+		HEADER.put("Phone", "Рабочий телефон (компания)");
+		HEADER.put("Email", "Рабочий email (компания)");
 		HEADER.put("City", "Город");
-		HEADER.put("Website", "Сайт");
+		HEADER.put("Website", "Web");
 		HEADER.put("Address", "Адрес");
 		HEADER.put("Sphere", "Сфера деятельности");
 		
-		for (int i = START_PAGE; i < END_PAGE; i++) {
-			Page page;
-			
-			try {
-				page = new Page(i);
-			} catch (org.jsoup.HttpStatusException | java.io.FileNotFoundException e) {
-				break;
-			}
-			
-			for (int j = 0; j < page.getLinks().length; j++) {
-				Parser parser = new Parser(page.getLinks()[j], GIS_URL);
-				CompanyCard card = new CompanyCard();
-				
-				card.setProperty(HEADER.get("CompanyName"),	parser.getName());
-				card.setProperty(HEADER.get("Phone"), 		parser.getPhones());
-				card.setProperty(HEADER.get("Email"), 		parser.getEmails());
-				card.setProperty(HEADER.get("City"), 		Main.CITY_RU);
-				card.setProperty(HEADER.get("Website"),		parser.getWebsite());
-				card.setProperty(HEADER.get("Address"), 	parser.getAddress());
-				card.setProperty(HEADER.get("Sphere"), 		parser.getTypes());
-				
-				if (card.isValid()) {
-					COMPANIES.put(card.getProperties().get(HEADER.get("CompanyName")), card);
-					addedCounter++;
-					System.out.printf("%-25s%s%n",
-							card.getProperties().get("Название компании"),
-							card.getProperties().get("Сайт"));
-				}
-				
-				counter++;
-			}
-			
-			System.out.println("Страница " + i + " просмотренна");
-		}
 		
-		long endWork = System.currentTimeMillis();
+		POSITIVE_FILTER.put("мягкая мебель", new String[] {"мягкой мебели", "диваны",
+				"диванов", "диван", "мягкая мебель"});
+		POSITIVE_FILTER.put("матрасы", new String[] {"матрасов", "матрацы", "матрас", "матрасы"});
+		POSITIVE_FILTER.put("корпусная мебель", new String[] {"корпусная мебель", "корпусной мебели"});
 		
-		Table table = new Table();
-		table.setHeader(HEADER.values().toArray());
+//		NEGATIVE_FILTER.put("детская мягкая мебель", new String[] {"детская мягкая мебель", 
+//				"детской мягкой мебели", "мягкая мебель для детей", "детские диваны"});
+//		NEGATIVE_FILTER.put("итальянская мягкая мебель", new String[] {"итальянская мягкая мебель",
+//				"мягкая мебель из италии", "мягкая итальянская мебель"});
+//		NEGATIVE_FILTER.put("офисная мягкая мебель", new String[] {"офисные диваны", "офисный диван", "диван офисный",
+//				"диван для офиса", "офисные диваны", "офисная мягкая мебель", "мягкая мебель для офиса", "мягкая офисная мебель",
+//				"офисной мягкой мебели", "офисных диванов"});
 		
-		for (CompanyCard card : COMPANIES.values()) {
-			table.fillRow(card);
-		}
+		Parser parser = new Parser(new java.net.URL("http://www.askona.ru"), POSITIVE_FILTER, POSITIVE_FILTER);
+		parser.checkTypes("askona.ru", POSITIVE_FILTER.values().toArray(new String[POSITIVE_FILTER.size()][]));
 		
-		table.write("test");
-		
-		
-		long work = endWork - startWork;
-		System.out.println("Работа завершена. Просмотренно " + counter + " компаний."
-				+ " В базу занесено " + addedCounter + ". Затрачено " + 
-				(work / 1000 / 60) + " минут " + (work / 1000 % 60) + " секунд");
-	}
-	
-	
-	public static String lat2cyr(String s){
-		StringBuilder sb = new StringBuilder(s.length());
-		
-		int i = 0;
-		while (i < s.length()) {
-			char ch = s.charAt(i);
-			
-			if (ch == 'J'){
-				i++; 
-				ch = s.charAt(i);
-				
-				switch (ch) {
-					case 'E': sb.append('Ё'); break;
-					case 'S':
-						sb.append('Щ');
-						i++; 
-						if(s.charAt(i) != 'H') 
-							throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
-						break;
-					case 'H': sb.append('Ь'); break;
-					case 'U': sb.append('Ю'); break;
-					case 'A': sb.append('Я'); break;
-					default: 
-						throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
-				}
-			} else if (i+1 < s.length() && s.charAt(i+1)=='H' 
-					&& !(i+2 < s.length() && s.charAt(i+2)=='H')) {
-				switch (ch) {
-					case 'Z': sb.append('Ж'); break;
-					case 'K': sb.append('Х'); break;
-					case 'C': sb.append('Ч'); break;
-					case 'S': sb.append('Ш'); break;
-					case 'E': sb.append('Э'); break;
-					case 'H': sb.append('Ъ'); break;
-					case 'I': sb.append('Ы'); break;
-					default:
-						throw new IllegalArgumentException("Illegal transliterated symbol at position "+i);
-				}
-				
-				i++;
-			} else {
-				switch (ch) {
-					case 'A': sb.append('А'); break;
-					case 'B': sb.append('Б'); break;
-					case 'V': sb.append('В'); break;
-					case 'G': sb.append('Г'); break;
-					case 'D': sb.append('Д'); break;
-					case 'E': sb.append('Е'); break;
-					case 'Z': sb.append('З'); break;
-					case 'I': sb.append('И'); break;
-					case 'Y': sb.append('Й'); break;
-					case 'K': sb.append('К'); break;
-					case 'L': sb.append('Л'); break;
-					case 'M': sb.append('М'); break;
-					case 'N': sb.append('Н'); break;
-					case 'O': sb.append('О'); break;
-					case 'P': sb.append('П'); break;
-					case 'R': sb.append('Р'); break;
-					case 'S': sb.append('С'); break;
-					case 'T': sb.append('Т'); break;
-					case 'U': sb.append('У'); break;
-					case 'F': sb.append('Ф'); break;
-					case 'C': sb.append('Ц'); break;
-					default: sb.append(ch);
-				}
-			}
-
-			i++;
-		}
-		return sb.toString();
+		System.out.println("asdf");
+//		
+//		Analyst analyst = new Analyst(POSITIVE_FILTER, NEGATIVE_FILTER, REQUEST, CITY);
+//		analyst.start();
+//		
+//		long endWork = System.currentTimeMillis();
+//		
+//		Table table = new Table();
+//		table.setHeader(HEADER.values().toArray());
+//		table.fillTable(analyst.getData());
+//		table.write(CITY_RU + "_" + REQUEST + "_" + START_PAGE + "-" + END_PAGE + "_TEST2");
+//		
+//		
+//		long work = endWork - startWork;
+//		System.out.println("Работа завершена. Просмотренно " + "???" + " компаний."
+//				+ " В базу занесено " + analyst.getData().length + ". Затрачено " + 
+//				(work / 1000 / 60) + " минут " + (work / 1000 % 60) + " секунд");
 	}
 }

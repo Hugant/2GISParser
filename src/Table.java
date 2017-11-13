@@ -58,4 +58,10 @@ public class Table {
 		}
 	}
 	
+	public void fillTable(CompanyCard[] companies) {
+		for (CompanyCard card : companies) {
+			fillRow(card);
+		}
+	}
+	
 }
