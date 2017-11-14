@@ -44,10 +44,10 @@ public class Parser {
 		return types;
 	}
 	
-	public String checkTypes(String url, String[]... params) throws IOException {
+	private String checkTypes(String url, String[]... params) throws IOException {
 		String types = "";
 		
-		if (!url.contains("http://")) {
+		if (!url.contains("http")) {
 			url = "http://" + url;
 		}
 		
@@ -59,7 +59,6 @@ public class Parser {
 		} catch (IllegalArgumentException e) {
 			return "";
 		}
-		System.out.println(doc);
 		
 		String html = doc.html().toLowerCase();
 		
@@ -147,19 +146,19 @@ public class Parser {
 	
 	public String getWebsite() {
 		Elements elSites = this.doc.select("._type_website");
-		String sites = "";
+		String sites = elSites.get(0).select(".contact__linkText").get(0).text();
 		
-		for (int i = 0; i < elSites.size(); i++) {
-			if (i != 0) 
-				sites += ", ";
-			
-			if (elSites.get(i).select(".contact__linkText").size() == 0) {
-				break;
-			} else {
-				sites += elSites.get(i).select(".contact__linkText").get(0).text();
-			}
-			
-		}
+//		for (int i = 0; i < elSites.size(); i++) {
+//			if (i != 0) 
+//				sites += ", ";
+//			
+//			if (elSites.get(i).select(".contact__linkText").size() == 0) {
+//				break;
+//			} else {
+//				sites += elSites.get(i).select(".contact__linkText").get(0).text();
+//			}
+//			
+//		}
 		
 		return sites;
 	}

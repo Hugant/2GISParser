@@ -28,7 +28,7 @@ public class Analyst {
 			for (URL url : page.getLinks()) {
 				Parser parser = new Parser(url, positiveFilter, negativeFilter);
 				
-				System.out.print(parser.getName() + "\t\t types: " + parser.getTypes());
+				System.out.print(parser.getName());
 				
 				if (!companies.containsKey(parser.getName())) {
 					CompanyCard card = parser.getCard();

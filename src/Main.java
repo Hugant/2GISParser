@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 public class Main {
 	public static final String GIS_URL = "https://2gis.ru";
 	
-	public static final String CITY_RU = "Уфа";
-	private static final String CITY = "ufa";
+	public static final String CITY_RU = "Москва";
+	private static final String CITY = "moscow";
 	
 	private static final String REQUEST = "мягкая мебель";
 	
@@ -36,33 +36,29 @@ public class Main {
 		POSITIVE_FILTER.put("матрасы", new String[] {"матрасов", "матрацы", "матрас", "матрасы"});
 		POSITIVE_FILTER.put("корпусная мебель", new String[] {"корпусная мебель", "корпусной мебели"});
 		
-//		NEGATIVE_FILTER.put("детская мягкая мебель", new String[] {"детская мягкая мебель", 
-//				"детской мягкой мебели", "мягкая мебель для детей", "детские диваны"});
-//		NEGATIVE_FILTER.put("итальянская мягкая мебель", new String[] {"итальянская мягкая мебель",
-//				"мягкая мебель из италии", "мягкая итальянская мебель"});
-//		NEGATIVE_FILTER.put("офисная мягкая мебель", new String[] {"офисные диваны", "офисный диван", "диван офисный",
-//				"диван для офиса", "офисные диваны", "офисная мягкая мебель", "мягкая мебель для офиса", "мягкая офисная мебель",
-//				"офисной мягкой мебели", "офисных диванов"});
+		NEGATIVE_FILTER.put("детская мягкая мебель", new String[] {"детская мягкая мебель", 
+				"детской мягкой мебели", "мягкая мебель для детей", "детские диваны"});
+		NEGATIVE_FILTER.put("итальянская мягкая мебель", new String[] {"итальянская мягкая мебель",
+				"мягкая мебель из италии", "мягкая итальянская мебель"});
+		NEGATIVE_FILTER.put("офисная мягкая мебель", new String[] {"офисные диваны", "офисный диван", "диван офисный",
+				"диван для офиса", "офисные диваны", "офисная мягкая мебель", "мягкая мебель для офиса", "мягкая офисная мебель",
+				"офисной мягкой мебели", "офисных диванов"});
 		
-		Parser parser = new Parser(new java.net.URL("http://www.askona.ru"), POSITIVE_FILTER, POSITIVE_FILTER);
-		parser.checkTypes("askona.ru", POSITIVE_FILTER.values().toArray(new String[POSITIVE_FILTER.size()][]));
+
+		Analyst analyst = new Analyst(POSITIVE_FILTER, NEGATIVE_FILTER, REQUEST, CITY);
+		analyst.start();
 		
-		System.out.println("asdf");
-//		
-//		Analyst analyst = new Analyst(POSITIVE_FILTER, NEGATIVE_FILTER, REQUEST, CITY);
-//		analyst.start();
-//		
-//		long endWork = System.currentTimeMillis();
-//		
-//		Table table = new Table();
-//		table.setHeader(HEADER.values().toArray());
-//		table.fillTable(analyst.getData());
-//		table.write(CITY_RU + "_" + REQUEST + "_" + START_PAGE + "-" + END_PAGE + "_TEST2");
-//		
-//		
-//		long work = endWork - startWork;
-//		System.out.println("Работа завершена. Просмотренно " + "???" + " компаний."
-//				+ " В базу занесено " + analyst.getData().length + ". Затрачено " + 
-//				(work / 1000 / 60) + " минут " + (work / 1000 % 60) + " секунд");
+		long endWork = System.currentTimeMillis();
+		
+		Table table = new Table();
+		table.setHeader(HEADER.values().toArray());
+		table.fillTable(analyst.getData());
+		table.write(CITY_RU + "_" + REQUEST + "_" + START_PAGE + "-" + END_PAGE + "_TEST2");
+		
+		
+		long work = endWork - startWork;
+		System.out.println("Работа завершена. Просмотренно " + "???" + " компаний."
+				+ " В базу занесено " + analyst.getData().length + ". Затрачено " + 
+				(work / 1000 / 60) + " минут " + (work / 1000 % 60) + " секунд");
 	}
 }
