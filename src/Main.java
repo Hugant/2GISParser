@@ -1,22 +1,22 @@
 package src;
 
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 
 public class Main {
 	public static final String GIS_URL = "https://2gis.ru";
 	
-	public static final String CITY_RU = "Москва";
-	private static final String CITY = "moscow";
+	public static final String CITY_RU = "Астана";
+	private static final String CITY = "astana";
 	
 	private static final String REQUEST = "мягкая мебель";
 	
-	private static final int START_PAGE = 1;
-	private static final int END_PAGE = 0;
-	
 	public static final LinkedHashMap<String, String> HEADER = new LinkedHashMap<String, String>();
 	
-	private static LinkedHashMap<String, String[]> POSITIVE_FILTER = new LinkedHashMap<String, String[]>();
-	private static LinkedHashMap<String, String[]> NEGATIVE_FILTER = new LinkedHashMap<String, String[]>();
+	private static final LinkedHashMap<String, String[]> POSITIVE_FILTER = new LinkedHashMap<String, String[]>();
+	private static final LinkedHashMap<String, String[]> NEGATIVE_FILTER = new LinkedHashMap<String, String[]>();
 	
 	public static void main(String[] args) throws Exception {
 		long startWork = System.currentTimeMillis();
@@ -44,7 +44,30 @@ public class Main {
 				"диван для офиса", "офисные диваны", "офисная мягкая мебель", "мягкая мебель для офиса", "мягкая офисная мебель",
 				"офисной мягкой мебели", "офисных диванов"});
 		
-
+//		URL u = new URL("https://москва.рф/asdf&asd/f?asdf");
+//		URLValidator v = new URLValidator("егэ-русский.рф/zadanie-vtoroe-ege-russkij/");
+//		System.out.println(u.getHost());
+//		System.out.println(u.getPath());
+//		System.out.println(u.getProtocol());
+//		System.out.println(u.getQuery());
+//		System.out.println(u.getFile());
+//	    String host = u.getHost();
+//
+//	    String[] labels = host.split("\\.");
+//	    for (int i = 0; i < labels.length; i++) {
+//	        labels[i] = java.net.IDN.toASCII(labels[i]);
+//	        System.out.println(labels[i]);
+//	    }
+//	    host = String.join(".", labels);
+//		
+//		URL url = new URL(host);
+//		System.out.println(url.getPath());
+//		String c = "https://www.mos.ru/something=рак/";
+//		c = URLEncoder.encode(c, "UTF-8");
+//		String a = java.net.IDN.toASCII("https://москва.рф");
+//	    System.out.println(c);
+		
+		
 		Analyst analyst = new Analyst(POSITIVE_FILTER, NEGATIVE_FILTER, REQUEST, CITY);
 		analyst.start();
 		
@@ -53,7 +76,7 @@ public class Main {
 		Table table = new Table();
 		table.setHeader(HEADER.values().toArray());
 		table.fillTable(analyst.getData());
-		table.write(CITY_RU + "_" + REQUEST + "_" + START_PAGE + "-" + END_PAGE + "_TEST2");
+		table.write(CITY_RU + "_" + REQUEST);
 		
 		
 		long work = endWork - startWork;

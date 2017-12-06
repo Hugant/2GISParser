@@ -24,7 +24,16 @@ public class Parser {
 			this.doc = Jsoup.parse(url.openStream(), "UTF-8", Main.GIS_URL);
 		} catch (IOException e) {
 			System.out.println("Cannot open stream with " + url.toString());
-			return;
+			System.out.println("Наверное что-то не так с интернетом");
+			System.out.println("Следующий запрос через 10 секунд");
+			
+			try {
+				Thread.sleep(10000);
+				Parser parser = new Parser(url, positiveFilter, negativeFilter);
+				this.doc = parser.doc;
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 	
@@ -146,7 +155,9 @@ public class Parser {
 	
 	public String getWebsite() {
 		Elements elSites = this.doc.select("._type_website");
-		String sites = elSites.get(0).select(".contact__linkText").get(0).text();
+		if (elSites.size() > 0)
+			if (elSites.get(0).select(".contact__linkText").size() > 0)
+				return elSites.get(0).select(".contact__linkText").get(0).text();
 		
 //		for (int i = 0; i < elSites.size(); i++) {
 //			if (i != 0) 
@@ -160,7 +171,7 @@ public class Parser {
 //			
 //		}
 		
-		return sites;
+		return "";
 	}
 	
 	public String getCity() {

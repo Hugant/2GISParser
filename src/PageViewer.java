@@ -7,7 +7,7 @@ public class PageViewer {
 
 	public PageViewer(String city, String request) {
 		System.out.print("Parsing of pages: ");
-		for (int i = 1; i < 3; i++) {
+		for (int i = 1; ; i++) {
 			try {
 				pages.add(new Page(city, request, i));
 			} catch (java.io.IOException e) {
